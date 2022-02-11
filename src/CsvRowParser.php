@@ -20,6 +20,8 @@ class CsvRowParser
     private $hashable     = ['password'];
     private $validate     = [];
     private $encode       = TRUE;
+    private $trim         = TRUE;
+    private $trimChars;
 
     private $key;
     private $value;
@@ -37,8 +39,10 @@ class CsvRowParser
      * @param array $hashable
      * @param array $validate
      * @param boolean $encode
+     * @param boolean $trim
+     * @param string $trimChars
      */
-    public function __construct( $header, $empty, $defaults, $timestamps, $parsers, $hashable, $validate, $encode )
+    public function __construct( $header, $empty, $defaults, $timestamps, $parsers, $hashable, $validate, $encode, $trim, $trimChars )
     {
         $this->header = $header;
 
@@ -55,6 +59,10 @@ class CsvRowParser
         $this->validate = $validate === NULL ? $this->validate : $validate;
 
         $this->encode = $encode === NULL ? $this->encode : $encode;
+
+        $this->trim = $trim === NULL ? $this->trim : $trim;
+
+        $this->trimChars = $trimChars;
     }
 
     /**
@@ -80,6 +88,8 @@ class CsvRowParser
             $this->isEmptyValue();
 
             $this->doParse();
+
+            $this->doTrim();
 
             $this->doEncode();
 
@@ -172,6 +182,20 @@ class CsvRowParser
     }
 
     /**
+     * Trim values from whitespace
+     *
+     * @return void
+     */
+    private function doTrim()
+    {
+        if ($this->trim === FALSE) return;
+
+        if (is_string($this->value) && !empty($this->value)) {
+            $this->value = trim($this->value, $this->trimChars);
+        }
+    }
+
+    /**
      * Encode the value to UTF8
      *
      * @return void
@@ -228,5 +252,4 @@ class CsvRowParser
         $this->parsedRow[ 'created_at' ] = $this->timestamps;
         $this->parsedRow[ 'updated_at' ] = $this->timestamps;
     }
-
 }
