@@ -1,0 +1,68 @@
+diff --git a/src/CsvRowParser.php b/src/CsvRowParser.php
+index cefb405..01e69d9 100644
+--- a/src/CsvRowParser.php
++++ b/src/CsvRowParser.php
+@@ -20,6 +20,8 @@ class CsvRowParser
+     private $hashable     = ['password'];
+     private $validate     = [];
+     private $encode       = TRUE;
++    private $trim         = TRUE;
++    private $trimChars;
+ 
+     private $key;
+     private $value;
+@@ -171,6 +173,20 @@ class CsvRowParser
+         $this->value = $closure( $this->value );
+     }
+ 
++    /**
++     * Trim values from whitespace
++     *
++     * @return void
++     */
++    private function doTrim()
++    {
++        if ($this->trim === FALSE) return;
++
++        if (is_string($this->value) && !empty($this->value)) {
++            $this->value = trim($this->value, $this->trimChars);
++        }
++    }
++
+     /**
+      * Encode the value to UTF8
+      *
+diff --git a/src/CsvSeeder.php b/src/CsvSeeder.php
+index 70307ab..e0999f9 100644
+--- a/src/CsvSeeder.php
++++ b/src/CsvSeeder.php
+@@ -170,6 +170,20 @@ class CsvSeeder extends Seeder
+     */
+     public $encode = TRUE;
+ 
++    /**
++     * Trim the values of the rows
++     *
++     * @var boolean
++     */
++    public $trim = TRUE;
++
++    /**
++     * The pattern of the characters that will be trimmed/removed
++     *
++     * @var string
++     */
++    public $trimChars = " \t\n\r\v\0\x0B";
++
+ 
+     private $filepath;
+     private $csvData;
+@@ -364,7 +378,7 @@ class CsvSeeder extends Seeder
+     {
+         if( ! $this->csvData || empty($this->header) ) return;
+ 
+-        $parser = new CsvRowParser( $this->header, $this->empty, $this->defaults, $this->timestamps, $this->parsers, $this->hashable, $this->validate, $this->encode );
++        $parser = new CsvRowParser( $this->header, $this->empty, $this->defaults, $this->timestamps, $this->parsers, $this->hashable, $this->validate, $this->encode, $this->trim, $this->trimChars );
+ 
+         while( ($row = fgetcsv( $this->csvData, 0, $this->delimiter )) !== FALSE )
+         {

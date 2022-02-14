@@ -170,6 +170,20 @@ class CsvSeeder extends Seeder
     */
     public $encode = TRUE;
 
+    /**
+     * Trim the values of the rows
+     *
+     * @var boolean
+     */
+    public $trim = TRUE;
+
+    /**
+     * The pattern of the characters that will be trimmed/removed
+     *
+     * @var string
+     */
+    public $trimChars = " \t\n\r\v\0\x0B";
+
 
     private $filepath;
     private $csvData;
@@ -364,7 +378,7 @@ class CsvSeeder extends Seeder
     {
         if( ! $this->csvData || empty($this->header) ) return;
 
-        $parser = new CsvRowParser( $this->header, $this->empty, $this->defaults, $this->timestamps, $this->parsers, $this->hashable, $this->validate, $this->encode );
+        $parser = new CsvRowParser( $this->header, $this->empty, $this->defaults, $this->timestamps, $this->parsers, $this->hashable, $this->validate, $this->encode, $this->trim, $this->trimChars );
 
         while( ($row = fgetcsv( $this->csvData, 0, $this->delimiter )) !== FALSE )
         {

@@ -20,6 +20,8 @@ class CsvRowParser
     private $hashable     = ['password'];
     private $validate     = [];
     private $encode       = TRUE;
+    private $trim         = TRUE;
+    private $trimChars;
 
     private $key;
     private $value;
@@ -37,8 +39,10 @@ class CsvRowParser
      * @param array $hashable
      * @param array $validate
      * @param boolean $encode
+     * @param boolean $trim
+     * @param string $trimChars
      */
-    public function __construct( $header, $empty, $defaults, $timestamps, $parsers, $hashable, $validate, $encode )
+    public function __construct( $header, $empty, $defaults, $timestamps, $parsers, $hashable, $validate, $encode, $trim, $trimChars)
     {
         $this->header = $header;
 
@@ -55,6 +59,12 @@ class CsvRowParser
         $this->validate = $validate === NULL ? $this->validate : $validate;
 
         $this->encode = $encode === NULL ? $this->encode : $encode;
+
+        $this->trim = $trim === NULL ? $this->trim : $trim;
+        
+        $this->trimChars = $trimChars;
+
+
     }
 
     /**
@@ -78,6 +88,8 @@ class CsvRowParser
         foreach( $this->row as $this->key => $this->value )
         {
             $this->isEmptyValue();
+            
+            $this->doTrim();
 
             $this->doParse();
 
@@ -169,6 +181,20 @@ class CsvRowParser
         if( ! is_callable($closure) ) return;
 
         $this->value = $closure( $this->value );
+    }
+
+    /**
+     * Trim values from whitespace
+     *
+     * @return void
+     */
+    private function doTrim()
+    {
+        if ($this->trim === FALSE) return;
+
+        if (is_string($this->value) && !empty($this->value)) {
+            $this->value = trim($this->value, $this->trimChars);
+        }
     }
 
     /**
